@@ -1,0 +1,66 @@
+{
+  "states": [
+    {
+      "name": "Sleepy",
+      "min": 40.0,
+      "max": 70.0
+    },
+    {
+      "name": "Normal",
+      "min": 70.0,
+      "max": 100.0
+    },
+    {
+      "name": "High",
+      "min": 100.0,
+      "max": 150.0
+    }
+  ],
+  "transitions": [
+    {
+      "from_state": "Sleepy",
+      "to_state": "Sleepy",
+      "rate": 0.7
+    },
+    {
+      "from_state": "Sleepy",
+      "to_state": "Normal",
+      "rate": 0.2
+    },
+    {
+      "from_state": "Sleepy",
+      "to_state": "High",
+      "rate": 0.1
+    },
+    {
+      "from_state": "Normal",
+      "to_state": "Sleepy",
+      "rate": 0.1
+    },
+    {
+      "from_state": "Normal",
+      "to_state": "Normal",
+      "rate": 0.6
+    },
+    {
+      "from_state": "Normal",
+      "to_state": "High",
+      "rate": 0.3
+    },
+    {
+      "from_state": "High",
+      "to_state": "Sleepy",
+      "rate": 0
+    },
+    {
+      "from_state": "High",
+      "to_state": "Normal",
+      "rate": 0.5
+    },
+    {
+      "from_state": "High",
+      "to_state": "Normal",
+      "rate": 0.5
+    }
+  ]
+}
