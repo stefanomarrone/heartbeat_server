@@ -1,15 +1,18 @@
 import random
 
-from chain import Chain, State
+from pgmpy.sampling.Sampling import State
+
+from chain import Chain, ChainState
 from pgmpy.models import MarkovChain
 from pgmpy.factors.discrete import DiscreteFactor
+from metaclasses import Singleton
 
-
-class Heart:
-    def __init__(self, chain: Chain):
-        self.populate()
+class Heart(metaclass=Singleton):
+    def __init__(self, chain: Chain = None):
+        self.mapping = dict()
+        self.populate(chain)
         self.states = chain.states
-        self.current_state: State = random.choice(self.states)
+        self.current_state: ChainState = random.choice(self.states)
 
     def beat(self):
         lo_bound = self.current_state.min
@@ -20,28 +23,36 @@ class Heart:
         return beat
 
     def transition(self):
-        transitions = self.get_transition_model().get(self.current_state.name, {})
-        states, probs = zip(*transitions.items())
-        next_state_name = random.choices(states, probs)[0]
-        next_state = list(filter(lambda x: x.name == next_state_name), self.states)[0]
+        current_state_index = self.mapping[self.current_state.name]
+        start_point = [State(var='beat', state=current_state_index)]
+        samples = list(self.model.generate_sample(start_point, 1))
+        sample = samples[0][0].state
+        next_state_name = self.mapping[sample]
+        next_state = list(filter(lambda x: x.name == next_state_name ,self.states))[0]
         return next_state
 
     def populate(self, chain: Chain):
         mmodel = MarkovChain()
+        # 1. Add variables (states)
         state_names = [state.name for state in chain.states]
-        mmodel.add_nodes_from(state_names)
-        for transition in chain.transitions:
-            mmodel.add_edge(transition.from_state, transition.to_state)
-        for transition in chain.transitions:
-            factor = DiscreteFactor(
-                variables=[transition.from_state, transition.to_state],
-                cardinality=[2, 2],
-                values=[1 - transition.rate, transition.rate, transition.rate, 1 - transition.rate]
-            )
-            mmodel.add_factors(factor)
+        mmodel.add_variable("beat", len(state_names))
+        # 2. Mapping
+        counter = 0
+        for state_name in state_names:
+            self.mapping[state_name] = counter
+            self.mapping[counter] = state_name
+            counter += 1
+        # 3. Build and set per-state transition models
+        per_state_transitions = {self.mapping[name]: {} for name in state_names}
+        for t in chain.transitions:
+            from_index = self.mapping[t.from_state]
+            to_index =  self.mapping[t.to_state]
+            per_state_transitions[from_index][to_index] = t.rate
+        mmodel.add_transition_model('beat', per_state_transitions)
+        # 4. Store the built model
         self.model = mmodel
 
-    def log(self, state: State):
+    def log(self, state: ChainState):
         print(f'next state is {state.name}')
 
 
