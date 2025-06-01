@@ -1,28 +1,30 @@
+import sys
 from fastapi import APIRouter, FastAPI
-from collections import defaultdict
+import json
 import uvicorn
-import random
+from pydantic import ValidationError
+from chain import Chain
+from heartbeat import Heart
 
 router = APIRouter()
 
-
-
-# Range dei BPM per ciascuno stato
-bpm_ranges = {
-}
-
-
-# Endpoint per ottenere un nuovo beat (BPM)
-@app.get("/getbeat")
+@router.get("/getbeat")
 def get_beat():
-   bpm = 0
+   heart = Heart()
+   bpm = heart.beat()
    return {"beat": bpm}
 
-
-
-
 if __name__ == "__main__":
-   heart_configuration_filename = sys.argv[0]
-   app = FastAPI()
-   app.include_router(router)
-   uvicorn.run(app, port = 4415)
+   try:
+      heart_configuration_filename = sys.argv[1]
+      # Step 1: Read the file content
+      with open(heart_configuration_filename) as f:
+         data = json.load(f)
+      # Step 2: Validate using Pydantic
+      chain = Chain(**data)
+      heart = Heart(chain)
+      app = FastAPI()
+      app.include_router(router)
+      uvicorn.run(app, port = 4415)
+   except ValidationError as exc:
+      print(repr(exc.errors()[0]['type']))
