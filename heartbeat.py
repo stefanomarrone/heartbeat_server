@@ -1,10 +1,7 @@
 import random
-
 from pgmpy.sampling.Sampling import State
-
 from chain import Chain, ChainState
 from pgmpy.models import MarkovChain
-from pgmpy.factors.discrete import DiscreteFactor
 from metaclasses import Singleton
 
 class Heart(metaclass=Singleton):
