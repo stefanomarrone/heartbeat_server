@@ -15,8 +15,8 @@ class Heart(metaclass=Singleton):
         lo_bound = self.current_state.min
         hi_bound = self.current_state.max
         beat = random.uniform(lo_bound, hi_bound)
+        self.log(self.current_state, beat)
         self.current_state = self.transition()
-        self.log(self.current_state)
         return beat
 
     def transition(self):
@@ -49,7 +49,7 @@ class Heart(metaclass=Singleton):
         # 4. Store the built model
         self.model = mmodel
 
-    def log(self, state: ChainState):
-        print(f'next state is {state.name}')
+    def log(self, state: ChainState, beat: float):
+        print(f'current state is {state.name} and the beat is {beat}')
 
 
