@@ -19,11 +19,20 @@ class Heart(metaclass=Singleton):
         hi_bound = self.current_state.max
         beat = random.uniform(lo_bound, hi_bound)
         self.current_state = self.transition()
-        self.log(self.current_state)
+        text = f'Stato successivo calcolato: {self.current_state.name}\nBattito {beat} bpm.'
+        self.log(text)
         return beat
 
     def transition(self):
         current_state_index = self.mapping[self.current_state.name]
+
+        trans_dict = self.model.transition_models['beat'][current_state_index]
+        total = sum(trans_dict.values())
+        probs = {k: v / total for k, v in trans_dict.items()}
+        print(f"Probabilità transizione da stato {self.current_state.name}:")
+        for state_index, p in probs.items():
+            print(f"  -> Stato {self.mapping[state_index]}: {p:.4f}")
+
         start_point = [State(var='beat', state=current_state_index)]
         samples = list(self.model.generate_sample(start_point, 1))
         sample = samples[0][0].state
@@ -52,7 +61,7 @@ class Heart(metaclass=Singleton):
         # 4. Store the built model
         self.model = mmodel
 
-    def log(self, state: ChainState):
-        print(f'next state is {state.name}')
+    def log(self, text):
+        print(text)
 
 
