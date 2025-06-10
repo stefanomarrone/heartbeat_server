@@ -29,7 +29,7 @@ class Heart(metaclass=Singleton):
         trans_dict = self.model.transition_models['beat'][current_state_index]
         total = sum(trans_dict.values())
         probs = {k: v / total for k, v in trans_dict.items()}
-        print(f"Probabilità transizione da stato {self.current_state.name}:")
+        print(f"Prob. transizione da stato {self.current_state.name}:")
         for state_index, p in probs.items():
             print(f"  -> Stato {self.mapping[state_index]}: {p:.4f}")
 
