@@ -14,6 +14,14 @@ def get_beat():
    bpm = heart.beat()
    return {"beat": bpm}
 
+import logging
+
+logging.basicConfig(
+    filename="server_markov.log",
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+)
+
 if __name__ == "__main__":
    try:
       heart_configuration_filename = sys.argv[1]
